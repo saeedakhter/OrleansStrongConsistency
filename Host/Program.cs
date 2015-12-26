@@ -63,23 +63,44 @@ namespace Host
             await e1.AddCurrency(20);
             await e2.AddGoods(10);
 
-            await e1.DebugDelay(4000);
+            await e1.Print();
+            await e2.Print();
+
+            Console.Write("Transfer 5 Currency and -5 Goods from e1 to e2... ");
+            if(await e1.Transfer(Guid.NewGuid(), e2, new EmployeeStateTransfer() { Currency = 5, Goods = -5 }))
+            {
+                Console.WriteLine("Success!");
+            } 
+            else
+            {
+                Console.WriteLine("Failed");
+            }
 
             await e1.Print();
             await e2.Print();
 
-            await e1.TransferTo(DateTime.Now.ToOADate(), e2, 5, -5);
+            Console.WriteLine("Transfer 5 Currency and -500 Goods from e1 to e2");
+            if(await e1.Transfer(Guid.NewGuid(), e2, new EmployeeStateTransfer() { Currency = 5, Goods = -500 }))
+            {
+                Console.WriteLine("Success!");
+            }
+            else
+            {
+                Console.WriteLine("Failed");
+            }
 
             await e1.Print();
             await e2.Print();
 
-            await e1.TransferTo(DateTime.Now.ToOADate(), e2, 5, -500);
-
-            await e1.Print();
-            await e2.Print();
-
-            await e1.TransferTo(DateTime.Now.ToOADate(), e2, 5, -5);
-
+            Console.WriteLine("Transfer 5 Currency and -5 Goods from e1 to e2");
+            if(await e1.Transfer(Guid.NewGuid(), e2, new EmployeeStateTransfer() { Currency = 5, Goods = -5 }))
+            {
+                Console.WriteLine("Success!");
+            } 
+            else
+            {
+                Console.WriteLine("Failed");
+            }
             await e1.Print();
             await e2.Print();
 

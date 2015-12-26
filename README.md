@@ -33,3 +33,7 @@ Be sure to open "Host\OrleansConfiguration.xml" and insert the name of your Azur
 
 Hit F5 to run the Host which is a console application.  You should see two "Employees" trading Currency and Goods back and forth.  Feel free to kill the process mid-transaction, and restart it to see how the system recovers.
 
+Change History
+==============
+Nov 26, 2015 - Original example with transaction code embedded in Employee class
+Dev 26, 2015 - Made generic base class GrainStateWithTransfer which supports safe grain to grain transfer

@@ -6,17 +6,14 @@ using System.Threading.Tasks;
 
 namespace GrainInterfaces
 {
-    // can receive a transfer - Employee is the only grain implementing this interface in this example, but it could make sense for many grain types to implement this
-    public interface ITransferReceiver
+    public class EmployeeStateTransfer
     {
-        // idempotent - this operation can be safely executed more than once with the same timestamp
-        Task<bool> ReceiveTransfer(double Timestamp, int Currency, int Goods);
+        public int Currency { get; set; }
+        public int Goods { get; set; }
     }
 
-    public interface IEmployee : Orleans.IGrainWithGuidKey, ITransferReceiver
+    public interface IEmployee : Orleans.IGrainWithGuidKey, IAcceptsDeltaState<EmployeeStateTransfer>
     {
-        Task<bool> TransferTo(double Timestamp, ITransferReceiver target, int Currency, int Goods);
-
         Task AddCurrency(int currency);
         Task AddGoods(int goods);
 
@@ -24,7 +21,5 @@ namespace GrainInterfaces
         Task<bool> SpendGoods(int goods);
 
         Task Print();
-        Task DebugDelay(int milliseconds);
-
     }
 }
