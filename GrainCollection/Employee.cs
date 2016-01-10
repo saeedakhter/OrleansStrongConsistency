@@ -1,8 +1,5 @@
 ﻿using Orleans;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using GrainInterfaces;
 using Orleans.Providers;
@@ -10,37 +7,33 @@ using Orleans.Providers;
 namespace GrainCollection
 {
     [Serializable]
-    public class EmployeeState : GrainStateWithTransfer<EmployeeStateTransfer>
+    public class EmployeeState : TransactionGrainState<EmployeeStateTransfer>
     {
         public string Name { get; set; }
         public int Currency { get; set; }
         public int Goods { get; set; }
     }
 
-    [StorageProvider(ProviderName = "AzureStorage")]
-    public class Employee : GrainWithTransfer<EmployeeState,EmployeeStateTransfer>, IEmployee
+    [StorageProvider(ProviderName="Default")]
+    public class Employee : TransactionGrain<EmployeeState,EmployeeStateTransfer>, IEmployee
     {
-        protected override bool Send(EmployeeStateTransfer deltaState)
+        protected override bool Commit(EmployeeStateTransfer deltaState)
         {
-            if((deltaState.Currency > 0 && deltaState.Currency > State.Currency) ||
-               (deltaState.Goods > 0 && deltaState.Goods > State.Goods))
+            if (State.Currency + deltaState.Currency < 0 || State.Goods + deltaState.Goods < 0)
             {
-                return false;
-            }
-            State.Currency -= deltaState.Currency;
-            State.Goods -= deltaState.Goods;
-            return true;
-        }
-
-        protected override bool Receive(EmployeeStateTransfer deltaState)
-        {
-            if ((deltaState.Currency < 0 && -deltaState.Currency > State.Currency) ||
-                (deltaState.Goods < 0 && -deltaState.Goods > State.Goods))
-            {
+                Console.WriteLine("Employee.Commit returning false, insufficient funds");
                 return false;
             }
             State.Currency += deltaState.Currency;
             State.Goods += deltaState.Goods;
+            return true;
+        }
+
+        protected override bool Rollback(EmployeeStateTransfer deltaState)
+        {
+            Console.WriteLine("Employee.Rollback");
+            State.Currency -= deltaState.Currency;
+            State.Goods -= deltaState.Goods;
             return true;
         }
 
@@ -88,7 +81,7 @@ namespace GrainCollection
                 {
                     Console.WriteLine("Employee {0} is spending {1} goods", this.GetPrimaryKey(), goods);
                     State.Goods -= goods;
-                    await base.WriteStateAsync();
+                    await WriteStateAsync();
                     return true;
                 }
                 Console.WriteLine("Employee {0} has insufficient funds to spend {1} goods", this.GetPrimaryKey(), goods);
@@ -100,6 +93,16 @@ namespace GrainCollection
         {
             Console.WriteLine("Employee {0} has {1} goods and {2} currency", this.GetPrimaryKey(), State.Goods, State.Currency);
             return TaskDone.Done;
+        }
+
+        public Task<int> GetCurrency()
+        {
+            return Task.FromResult(State.Currency);
+        }
+
+        public Task<int> GetGoods()
+        {
+            return Task.FromResult(State.Goods);
         }
     }
 }

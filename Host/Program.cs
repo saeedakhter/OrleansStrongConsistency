@@ -1,11 +1,8 @@
-﻿using GrainInterfaces;
+﻿using Orleans.Runtime.Host;
 using Orleans;
-using Orleans.Runtime.Host;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
+using System;
+using GrainInterfaces;
 using System.Threading.Tasks;
 
 namespace Host
@@ -66,41 +63,13 @@ namespace Host
             await e1.Print();
             await e2.Print();
 
-            Console.Write("Transfer 5 Currency and -5 Goods from e1 to e2... ");
-            if(await e1.Transfer(Guid.NewGuid(), e2, new EmployeeStateTransfer() { Currency = 5, Goods = -5 }))
-            {
-                Console.WriteLine("Success!");
-            } 
-            else
-            {
-                Console.WriteLine("Failed");
-            }
+            var transaction = new TransactionHelper<EmployeeStateTransfer>();
+            transaction.Add(e1, new EmployeeStateTransfer() { Currency = -5, Goods = 5 });
+            transaction.Add(e2, new EmployeeStateTransfer() { Currency = 5, Goods = -5 });
+            Console.WriteLine("Executing transaction to trade 5 currency for 5 goods... ");
+            await transaction.Execute();
+            Console.WriteLine("Transaction complete.");
 
-            await e1.Print();
-            await e2.Print();
-
-            Console.WriteLine("Transfer 5 Currency and -500 Goods from e1 to e2");
-            if(await e1.Transfer(Guid.NewGuid(), e2, new EmployeeStateTransfer() { Currency = 5, Goods = -500 }))
-            {
-                Console.WriteLine("Success!");
-            }
-            else
-            {
-                Console.WriteLine("Failed");
-            }
-
-            await e1.Print();
-            await e2.Print();
-
-            Console.WriteLine("Transfer 5 Currency and -5 Goods from e1 to e2");
-            if(await e1.Transfer(Guid.NewGuid(), e2, new EmployeeStateTransfer() { Currency = 5, Goods = -5 }))
-            {
-                Console.WriteLine("Success!");
-            } 
-            else
-            {
-                Console.WriteLine("Failed");
-            }
             await e1.Print();
             await e2.Print();
 
@@ -131,5 +100,4 @@ namespace Host
             }
         }
     }
-
 }

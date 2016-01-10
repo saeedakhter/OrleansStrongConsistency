@@ -19,9 +19,11 @@ The problem occurs when a currency transaction spans two grain instances.  If a 
 The following codebase is meant to serve as an example of how to maintain consistency even though a silo can crash in-between Grain A and Grain B persisting states while a transaction is in flight between the two grains.  Essentially the first grain is persisted in a 'pending' state until it can confirm that the second grain has completed or rejected the transaction.
 
 Features of this implementation:
-- In the optimistic case, both Grain A and Grain B only persist their state once each.
-- If a silo failure does occur, Grain A will need to confirm with Grain B before it can resolve it's 'pending' state.
-- If the second grain has an insufficient balance to complete the transaction, then the transaction is rolled back on the first grain.
+- An easy to use base grain class.  Any grain that extends from it can be used in a transactions that guarantee data consistency.
+- A transaction can be committed atomically across 2 or more grains.  If a failure occurs before the commit is complete, all grains safely rollback to the previous state.
+- Cycles are avoided when two transactions are executing in parallel by locking grains in a deterministic order.
+- In the optimistic case, N+1 writes are required to complete a transaction where N is the number of grains involved.
+- If any grain returns false because it has an insufficient balance to complete the transaction, then the transaction is rolled back on the all grains.
 
 
 Setup
@@ -37,3 +39,4 @@ Change History
 ==============
 Nov 26, 2015 - Original example with transaction code embedded in Employee class
 Dev 26, 2015 - Made generic base class GrainStateWithTransfer which supports safe grain to grain transfer
+Jan 9, 2016 - Improvements to the base class and some unit tests

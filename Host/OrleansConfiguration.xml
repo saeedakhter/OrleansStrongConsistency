@@ -2,9 +2,11 @@
 <OrleansConfiguration xmlns="urn:orleans">
   <Globals>
     <SeedNode Address="localhost" Port="11111" />
+    <SystemStore SystemStoreType="AzureTable"
+                DataConnectionString="DefaultEndpointsProtocol=https;AccountName=YOURAZURESOTRAGEACCOUNTNAME;AccountKey=YOURAZURESTORAGEACCOUNTKEY" />
     <StorageProviders>
       <Provider Type="Orleans.Storage.AzureTableStorage"
-                Name="AzureStorage"
+                Name="Default"
                 DataConnectionString="DefaultEndpointsProtocol=https;AccountName=YOURAZURESOTRAGEACCOUNTNAME;AccountKey=YOURAZURESTORAGEACCOUNTKEY" />
     </StorageProviders>
   </Globals>
